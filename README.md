@@ -4,11 +4,14 @@
 
 ## 使用
 
+安装`ts-node`
+`yarn add ts-node -D`
+
 将以下命令添加到 package.json:
 
 ```
 "scripts": {
-  "parse": "ts-node index.js --i ./in --o ./out"
+  "parse": "ts-node ./node_modules/md2ts --i ./in --o ./out"
 },
 ```
 

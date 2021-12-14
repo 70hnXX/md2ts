@@ -1,4 +1,4 @@
-import MarkdownIt from "markdown-it";
+const MarkdownIt = require("markdown-it");
 import Token from "markdown-it/lib/token";
 
 export interface InterfaceConf {
