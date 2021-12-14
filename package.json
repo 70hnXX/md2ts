@@ -1,0 +1,28 @@
+{
+  "name": "md2ts",
+  "version": "1.0.0",
+  "description": "a markdown parser,parse markdown files to js/ts request functions and interfaces.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "parse": "ts-node index.js"
+  },
+  "keywords": [
+    "markdown",
+    "ts"
+  ],
+  "author": "70hnXX",
+  "license": "MIT",
+  "bin": {
+    "parse": "index.ts"
+  },
+  "dependencies": {
+    "@types/markdown-it": "^12.2.3",
+    "markdown-it": "^12.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.12",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  }
+}
