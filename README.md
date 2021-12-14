@@ -19,11 +19,10 @@
 
 GET.md
 
-````
+```
 # 接口示例<br>GET /example
 
 ## Query参数说明
-```json5
 {
   "keyword": "",
   "releaseDateStart": null,
@@ -31,11 +30,9 @@ GET.md
   "page": 0,
   "pageSize": 0
 }
-````
 
-## 返回体说明（application/json）
+返回体说明（application/json）
 
-```json5
 {
   code: "",
   message: "",
@@ -51,9 +48,6 @@ GET.md
     totalPage: 0,
   },
 }
-```
-
-```
 
 ```
 
