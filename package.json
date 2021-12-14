@@ -1,6 +1,6 @@
 {
   "name": "md2ts",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "a markdown parser,parse markdown files to js/ts request functions and interfaces.",
   "main": "index.js",
   "scripts": {

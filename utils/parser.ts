@@ -1,5 +1,5 @@
+import Token = require("markdown-it/lib/token");
 const MarkdownIt = require("markdown-it");
-import Token from "markdown-it/lib/token";
 
 export interface InterfaceConf {
   title?: string;
