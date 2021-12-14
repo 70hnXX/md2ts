@@ -28,22 +28,22 @@ async function makeDictory(pathStr) {
  */
 function delDictory(path, reservePath) {
   if (fs.existsSync(path)) {
-      if (fs.statSync(path).isDirectory()) {
-          let files = fs.readdirSync(path);
-          files.forEach((file, index) => {
-              let currentPath = path + "/" + file;
-              if (fs.statSync(currentPath).isDirectory()) {
-                  delFile(currentPath, reservePath);
-              } else {
-                  fs.unlinkSync(currentPath);
-              }
-          });
-          if (path != reservePath) {
-              fs.rmdirSync(path);
-          }
-      } else {
-          fs.unlinkSync(path);
+    if (fs.statSync(path).isDirectory()) {
+      let files = fs.readdirSync(path);
+      files.forEach((file, index) => {
+        let currentPath = path + "/" + file;
+        if (fs.statSync(currentPath).isDirectory()) {
+          delDictory(currentPath, reservePath);
+        } else {
+          fs.unlinkSync(currentPath);
+        }
+      });
+      if (path != reservePath) {
+        fs.rmdirSync(path);
       }
+    } else {
+      fs.unlinkSync(path);
+    }
   }
 }
 /**
@@ -52,7 +52,7 @@ function delDictory(path, reservePath) {
  * @param {*} string 
  * @returns 
  */
-function isFileExistedAndCreate(path_way,string) {
+function isFileExistedAndCreate(path_way, string) {
   return new Promise((resolve, reject) => {
     fs.access(path_way, (err) => {
       if (err) {
@@ -71,7 +71,7 @@ function isFileExistedAndCreate(path_way,string) {
 };
 
 /** 判断文件是否存在的函数
- * @path_way, 文件路径
+ * @param path_way, 文件路径
  */
 function isFileExisted(path_way) {
   return new Promise((resolve, reject) => {
@@ -84,7 +84,38 @@ function isFileExisted(path_way) {
     })
   })
 };
+
+function fileDisplay(filePath) {
+  return new Promise((resolve, reject) => {
+    fs.readdir(filePath, (err, files) => {
+      if (err) {
+        resolve(err);//"不存在"
+      } else {
+        resolve(files);//"存在"
+      }
+    })
+  })
+};
+
+// 判断路径是否是文件夹
+function isDirectory(path) {
+  return new Promise((resolve) => {
+    fs.stat(path, (err, stat) => {
+      if (err) {
+        throw err
+      }
+      if (stat.isFile()) {
+        resolve(false)
+      }
+      if (stat.isDirectory()) {
+        resolve(true)
+      }
+    })
+  })
+}
 module.exports = {
+  fileDisplay,
+  isDirectory,
   makeDictory,
   delDictory,
   isFileExisted,
