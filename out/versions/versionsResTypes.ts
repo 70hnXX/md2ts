@@ -1,9 +1,7 @@
 
 /* 版本列表 */
 export interface getVersionsResInterface {
-  rows: object;
-  totalSize: number;
-  totalPage: number
+
 }
 
 /* 发布版本信息 */

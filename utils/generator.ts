@@ -8,6 +8,9 @@ export interface outPutConfig {
   reqTypesRaw?: string;
   resTypesRaw?: string;
 }
+interface InterfaceConfig {
+  [key: string]: string | Object;
+}
 
 const getTypeByValue = (value: any) => {
   if (value === null) {
@@ -15,6 +18,20 @@ const getTypeByValue = (value: any) => {
   }
   return typeof value;
 };
+
+function generateInterface(data: any) {
+  if (JSON.stringify(data) === "{}") return {};
+  const interfaceList: InterfaceConfig = {};
+  for (const key in data) {
+    // 判断是否时复杂数据类型
+    if (typeof data[key] === "object") {
+      interfaceList[key] = generateInterface(data[key]);
+    } else {
+      interfaceList[key] = `${getTypeByValue(data[key])}`;
+    }
+  }
+  return interfaceList;
+}
 
 export const generator = (config: InterfaceConf) => {
   const { title, method, url, functionName, reqParams, reqData, resBody } =
@@ -41,14 +58,18 @@ export const generator = (config: InterfaceConf) => {
         : `  ${key}?: ${getTypeByValue(reqData[key])};\n`;
     }
   }
+  console.log(generateInterface(resBody));
 
-  for (const key in resBody) {
-    const isLast =
-      key === Object.keys(resBody)[Object.keys(resBody).length - 1];
-    resBodyDataInterface += isLast
-      ? `  ${key}: ${getTypeByValue(resBody[key])}`
-      : `  ${key}: ${getTypeByValue(resBody[key])};\n`;
-  }
+  // for (const key in resBody) {
+  //   if(typeof resBody[key] === 'object') {
+
+  //   }
+  //   const isLast =
+  //     key === Object.keys(resBody)[Object.keys(resBody).length - 1];
+  //   resBodyDataInterface += isLast
+  //     ? `  ${key}: ${getTypeByValue(resBody[key])}`
+  //     : `  ${key}: ${getTypeByValue(resBody[key])};\n`;
+  // }
 
   // 请求的方法
   const importMethodRaw = `

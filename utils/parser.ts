@@ -64,8 +64,8 @@ export const markdownParser = (mdStr: string) => {
       reqData: method !== "GET" ? requestBody : null,
       resBody: responseBody.data,
     };
-    console.log("------------config-----------");
-    console.log(config);
+    // console.log("------------config-----------");
+    // console.log(config);
     return config;
   } catch (e) {
     console.log(e);
