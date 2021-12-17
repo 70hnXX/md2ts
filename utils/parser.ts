@@ -3,9 +3,9 @@ const MarkdownIt = require("markdown-it");
 
 export interface InterfaceConf {
   title?: string;
-  fileName?: string;
+  fileName: string;
   functionName?: string;
-  method?: string;
+  method: string;
   url?: string;
   reqParams?: any;
   reqData?: any;
@@ -46,13 +46,13 @@ export const markdownParser = (mdStr: string) => {
     const tailName = urlArr[urlArr.length - 1];
     const functionName = method.toLowerCase() + firstToUpper(tailName);
 
-    // console.log('接口名称:', title);
-    // console.log('接口method:', method);
-    // console.log('接口url:', url);
-    // console.log('请求体:', requestBody);
-    // console.log('请求体注释:', codes[0].content.match(/#(.*?)\n|\*/g));
-    // console.log('返回体:', responseBody);
-    // console.log('返回体注释:', codes[1].content.match(/#(.*?)\n|\*/g));
+    // console.log("接口名称:", title);
+    // console.log("接口method:", method);
+    // console.log("接口url:", url);
+    // console.log("请求体:", requestBody);
+    // console.log("请求体注释:", codes[0].content.match(/#(.*?)\n|\*/g));
+    // console.log("返回体:", responseBody);
+    // console.log("返回体注释:", codes[1].content.match(/#(.*?)\n|\*/g));
 
     const config: InterfaceConf = {
       title, // 汉字标题
@@ -64,11 +64,8 @@ export const markdownParser = (mdStr: string) => {
       reqData: method !== "GET" ? requestBody : null,
       resBody: responseBody.data,
     };
-    // console.log("------------config-----------");
-    // console.log(config);
     return config;
   } catch (e) {
     console.log(e);
-    console.log(mdStr);
   }
 };

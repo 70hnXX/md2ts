@@ -51,26 +51,23 @@ async function init() {
       let requestFile = `import request from "@/utils/request";
       `
       let reqTypeFile = ""
-      let resTypeFile = ""
       filtedFileList.forEach(async function (subFileName) {
         var filedir = path.join(filePath, filename, subFileName);
-        console.log('filedir:', filedir)
         var content = fs.readFileSync(filedir, "utf-8");
         const config = markdownParser(content);
         const outPutConf = generator(config);
         // console.log(outPutConf.importMethodRaw)
-        requestFile += outPutConf.importMethodRaw
-        reqTypeFile += outPutConf.reqTypesRaw
-        resTypeFile += outPutConf.resTypesRaw
+        requestFile += outPutConf.importMethod
+        reqTypeFile += outPutConf.types
       })
       await isFileExistedAndCreate(`${outputPath}/${filename}/${filename}.ts`, requestFile)
-      await isFileExistedAndCreate(`${outputPath}/${filename}/${filename}ReqTypes.ts`, reqTypeFile)
-      await isFileExistedAndCreate(`${outputPath}/${filename}/${filename}ResTypes.ts`, resTypeFile)
+      await isFileExistedAndCreate(`${outputPath}/${filename}/${filename}Types.ts`, reqTypeFile)
     } else {
       var content = fs.readFileSync(filedir, "utf-8");
       const config = markdownParser(content);
       const outPutConf = generator(config);
-      await isFileExistedAndCreate(`${outputPath}/${config.fileName}.ts`, outPutConf.importMethodRaw)
+      await isFileExistedAndCreate(`${outputPath}/${config.fileName}.ts`, outPutConf.importMethod)
+      await isFileExistedAndCreate(`${outputPath}/${config.fileName}Types.ts`, outPutConf.types)
     }
   });
 }

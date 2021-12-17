@@ -2,30 +2,53 @@ import { InterfaceConf } from "./parser";
 
 export interface outPutConfig {
   importMethod?: string;
-  reqTypes?: string;
-  resTypes?: string;
-  importMethodRaw?: string;
-  reqTypesRaw?: string;
-  resTypesRaw?: string;
+  types?: string;
 }
 interface InterfaceConfig {
   [key: string]: string | Object;
+}
+
+const types: typeConfig[] = [];
+interface typeConfig {
+  name: string;
+  isExtra: boolean;
+  value: InterfaceConfig | any;
 }
 
 const getTypeByValue = (value: any) => {
   if (value === null) {
     return "any";
   }
+  if (value === "0001-01-01T00:00:00Z") return "Date";
   return typeof value;
 };
 
+// 首字母转大写
+function firstToUpper(str: string) {
+  return str.trim().toLowerCase().replace(str[0], str[0].toUpperCase());
+}
+
 function generateInterface(data: any) {
-  if (JSON.stringify(data) === "{}") return {};
+  if (JSON.stringify(data) === "{}") return "any";
+  if (data === null) return "any";
   const interfaceList: InterfaceConfig = {};
   for (const key in data) {
     // 判断是否时复杂数据类型
-    if (typeof data[key] === "object") {
+    if (key === null) return "any";
+    if (typeof data[key] === "object" && !Array.isArray(data[key])) {
       interfaceList[key] = generateInterface(data[key]);
+    } else if (Array.isArray(data[key])) {
+      interfaceList[key] = `${key}Type[]`;
+      // 简单数据类型
+      if (typeof data[key][0] !== "object") {
+        interfaceList[key] = `${typeof data[key][0]}[]`;
+      } else {
+        types.push({
+          name: `${key}Type`,
+          isExtra: true,
+          value: generateInterface(data[key][0]),
+        });
+      }
     } else {
       interfaceList[key] = `${getTypeByValue(data[key])}`;
     }
@@ -33,44 +56,77 @@ function generateInterface(data: any) {
   return interfaceList;
 }
 
+// 根据type数组，去生成interface
+function generateInterfaceStr(
+  fileName: string,
+  method: string,
+  types: typeConfig[]
+) {
+  if (!types.length) return "";
+  let returnStr: string = "";
+  types.forEach((type: typeConfig) => {
+    let typeStr = "";
+    for (const key in type.value) {
+      if (Object.prototype.hasOwnProperty.call(type.value, key)) {
+        const isLast =
+          key === Object.keys(type.value)[Object.keys(type.value).length - 1];
+        const element = type.value[key];
+        typeStr += isLast ? `  ${key}: ${element}` : `  ${key}: ${element};\n`;
+      }
+    }
+    returnStr += type.isExtra
+      ? `
+/* ${fileName} */
+export interface ${type.name} {
+${typeStr}
+}
+        `
+      : `
+/* ${fileName} */
+export interface ${method.toLowerCase()}${firstToUpper(fileName)}${firstToUpper(
+          type.name
+        )} {
+${typeStr}
+}
+    `;
+  });
+  return returnStr;
+}
+
 export const generator = (config: InterfaceConf) => {
-  const { title, method, url, functionName, reqParams, reqData, resBody } =
-    config;
+  const {
+    title,
+    fileName,
+    method,
+    url,
+    functionName,
+    reqParams,
+    reqData,
+    resBody,
+  } = config;
   const isGet = method === "GET";
-  let reqParamsInterface = "";
-  let reqDataInterface = "";
-  let resBodyDataInterface = "";
   // 解析req和res的结构，生成对应的type
   if (isGet) {
-    for (const key in reqParams) {
-      const isLast =
-        key === Object.keys(reqParams)[Object.keys(reqParams).length - 1];
-      reqParamsInterface += isLast
-        ? `  ${key}?: ${getTypeByValue(reqParams[key])}`
-        : `  ${key}?: ${getTypeByValue(reqParams[key])};\n`;
-    }
+    types.push({
+      name: "reqParamsTypes",
+      isExtra: false,
+      value: generateInterface(reqParams),
+    });
   } else {
-    for (const key in reqData) {
-      const isLast =
-        key === Object.keys(reqData)[Object.keys(reqData).length - 1];
-      reqDataInterface += isLast
-        ? `  ${key}?: ${getTypeByValue(reqData[key])}`
-        : `  ${key}?: ${getTypeByValue(reqData[key])};\n`;
-    }
+    types.push({
+      name: "reqBodyTypes",
+      isExtra: false,
+      value: generateInterface(reqData),
+    });
   }
-  console.log(generateInterface(resBody));
-
-  // for (const key in resBody) {
-  //   if(typeof resBody[key] === 'object') {
-
-  //   }
-  //   const isLast =
-  //     key === Object.keys(resBody)[Object.keys(resBody).length - 1];
-  //   resBodyDataInterface += isLast
-  //     ? `  ${key}: ${getTypeByValue(resBody[key])}`
-  //     : `  ${key}: ${getTypeByValue(resBody[key])};\n`;
-  // }
-
+  // 解析返回体
+  types.push({
+    name: "resBodyTypes",
+    isExtra: false,
+    value: generateInterface(resBody),
+  });
+  // 生成interface代码
+  const typeConfig = generateInterfaceStr(fileName, method, types);
   // 请求的方法
   const importMethodRaw = `
 /* ${title} */
@@ -83,33 +139,10 @@ export async function ${functionName}(${isGet ? "params" : "data"}) {
   })
 }
   `;
-  const importMethod = "```" + importMethodRaw + "```";
-
-  // 请求体types
-  const reqTypesRaw = `
-/* ${title} */
-export interface ${functionName}ReqInterface {
-${isGet ? reqParamsInterface : reqDataInterface}
-}
-`;
-  const reqTypes = "```" + reqTypesRaw + "```";
-
-  // 返回体types
-  const resTypesRaw = `
-/* ${title} */
-export interface ${functionName}ResInterface {
-${resBodyDataInterface}
-}
-`;
-  const resTypes = "```" + resTypesRaw + "```";
-
+  console.log(typeConfig);
   const outPut: outPutConfig = {
-    importMethod,
-    reqTypes: reqTypes,
-    resTypes: resTypes,
-    importMethodRaw,
-    reqTypesRaw,
-    resTypesRaw,
+    importMethod: importMethodRaw,
+    types: typeConfig,
   };
 
   return outPut;
